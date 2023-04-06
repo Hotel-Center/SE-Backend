@@ -9,9 +9,6 @@ RUN apt-get update && \
     && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install pika
-
-
 # install requirements for running project
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
@@ -25,6 +22,6 @@ WORKDIR /app
 # create static folder
 RUN mkdir -p static
 
-RUN sleep 10
+# RUN sleep 10
 # With this command we will test our project
 RUN python3 manage.py test
