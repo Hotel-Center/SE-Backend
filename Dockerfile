@@ -1,32 +1,30 @@
-FROM python:3.9-slim
+#Can not use python:3.11-alpine because of psycopg2 and other libraries
 
-#change working directory
-#WORKDIR /app
+FROM python:3.9-slim-buster
+
+# نصب pika به جای amqp
+RUN apt-get update && \
+    apt-get install -y \
+    gcc \
+    && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install pika
+
 
 # install requirements for running project
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
-
 # copy project files to the container
 COPY ./HotelCenter /app
+
+# set the working directory to /app
 WORKDIR /app
+
+# create static folder
 RUN mkdir -p static
 
-#WORKDIR /HotelCenter
-# !NOTE: make migrations and migrate in the docker-compose file and before running server
-#RUN cd HotelCenter
-#RUN echo | ls
-# RUN python3 manage.py makemigrations
-# RUN python3 manage.py migrate
-# RUN yes yes | python3 manage.py collectstatic
-
 RUN sleep 10
-#running tests
+# With this command we will test our project
 RUN python3 manage.py test
-
-#RUN echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('viraadmin@test.com', 'ViraSE1234')" | python manage.py shell
-
-#CMD ["python3","manage.py", "test"]
-# wsgi webserver on linux
-#CMD ['gunicorn','HotelCenter.wsgi:application',"-b :90"]
