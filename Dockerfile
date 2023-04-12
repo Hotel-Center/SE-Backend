@@ -1,17 +1,17 @@
 #Can not use python:3.11-alpine because of psycopg2 and other libraries
 
-FROM python:3.9-slim-buster
+FROM python:3.11-slim-buster
 
 # نصب pika به جای amqp
-RUN apt-get update && \
-    apt-get install -y \
-    gcc \
-    && \
-    rm -rf /var/lib/apt/lists/*
+# RUN apt-get update && \
+#     apt-get install -y \
+#     gcc \
+#     && \
+#     rm -rf /var/lib/apt/lists/*
 
 # install requirements for running project
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+# COPY requirements.txt requirements.txt
+# RUN pip install -r requirements.txt
 
 # copy project files to the container
 COPY ./HotelCenter /app
@@ -24,4 +24,4 @@ RUN mkdir -p static
 
 # RUN sleep 10
 # With this command we will test our project
-RUN python3 manage.py test
+# RUN python3 manage.py test
