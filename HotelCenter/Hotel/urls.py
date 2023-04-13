@@ -37,7 +37,7 @@ hotel_admin_router.register('panel', HotelInfoViewSet, basename='hotel-admin-pan
 
 hotel_router = routers.DefaultRouter()
 hotel_router.register('images', HotelImgViewSet, basename='hotel-images')
-hotel_router.register('search', HotelSearchViewSet, basename='hotel-room-search')
+# hotel_router.register('search', HotelSearchViewSet, basename='hotel-room-search')
 hotel_router.register('reserves', AdminReserveViewSet, basename='hotel-admin-reserve')
 hotel_router.register('roomspaces', AdminRoomSpaceViewSet, basename='hotel-admin-roomspace')
 hotel_router.register('rooms', AdminRoomViewSet, basename='hotel-admin-room')
@@ -55,5 +55,6 @@ urlpatterns = [
     path('admin/', include(hotel_admin_router.urls)),
     path('cancelreserve/', UserCancelReserveList.as_view()),
     path('room/<int:room_id>/', include(room_router.urls)),
+    path('search_room/',HotelSearchViewSet.as_view())
 
 ]
