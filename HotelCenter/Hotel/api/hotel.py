@@ -249,10 +249,10 @@ class HotelSearchViewSet(APIView):
            checkout=request.GET.get('checkout',"")
            checkin=request.GET.get('checkin',"")
            country=request.GET.get('country',"")
-           size=request.GET.get('country',0)
+           size=request.GET.get('size',0)
            queryset=None
            if city or checkout or checkin or country or size:
-               queryset=Room.objects.all(is_reserved=False)
+               queryset=Room.objects.filter(is_reserved=False)
            else:
                 queryset= Room.objects.filter(is_reserved=False,hotel__city__contains=city, check_out_range=checkout, check_in_range=checkin,hotel__country__contains=country,size=size)
            serializer=RoomSerializer(queryset,many=True)
