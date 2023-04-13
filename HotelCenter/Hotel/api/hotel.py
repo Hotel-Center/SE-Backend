@@ -14,10 +14,10 @@ from django.shortcuts import get_object_or_404
 from ..permissions import *
 from ..models import Hotel, Facility, HotelImage, Room, RoomSpace, Reserve, FavoriteHotel
 from ..serializers.hotel_serializers import HotelSerializer, FacilitiesSerializer, HotelImgSerializer \
-    , FavoriteHotelSerializer, BestHotelSerializer
+    , FavoriteHotelSerializer, BestHotelSerializer,RoomSerializer
 from ..serializers.room_serializers import PublicRoomSerializer, RoomSpaceSerializer
 from ..filter_backends import HotelMinRateFilters
-
+from rest_framework.views import APIView
 
 class HotelViewSet(viewsets.ModelViewSet):
     queryset = Hotel.objects.all()
@@ -242,72 +242,21 @@ class MyHotelsViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
         return Response(data=data, status=http.HTTPStatus.OK)
 
 
-class HotelSearchViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
-    """
-    search among one hotel rooms
-    """
-
-    serializer_class = PublicRoomSerializer
-
-    def get_queryset(self):
-        min_size = int(self.request.query_params.get('size', 1))
-        # print("\n min size: ", min_size)
-
-        if min_size < 1:
-            min_size = 1
-        all_rooms = Room.objects.filter(hotel=self.hotel_id, sleeps__gte=min_size).all()
-
-        if self.request.query_params.get('check_in'):
-            check_in = parse_date(self.request.query_params['check_in'])
-            check_out = parse_date(self.request.query_params['check_out'])
-
-            rooms = self.filter_date(all_rooms, check_in, check_out)
-            return rooms
-
-        return all_rooms
-
-    def filter_date(self, rooms, check_in, check_out):
-
-        valid_rooms = []
-        for room in rooms:
-            spaces = room.spaces.all()
-
-            # print('\n\nspaces: ', spaces)
-            resv = Reserve.objects.filter(roomspace__in=spaces, start_day__gte=check_out, end_day__lte=check_in).all()
-            spa_id = [r.roomspace for r in resv]
-            for s in spaces:
-                if not (s in spa_id):
-                    valid_rooms.append(room)
-                    break
-
-        return valid_rooms
-
-    def dispatch(self, request, *args, **kwargs):
-        self.request = request
-        self.hotel_id = kwargs['hid']
-        self.args = args
-        self.kwargs = kwargs
-
-        return super(HotelSearchViewSet, self).dispatch(request, *args, **kwargs)
-
-    def list(self, request, *args, **kwargs):
-        if request.query_params.get('check_in'):
-            try:
-                check_in = parse_date(request.query_params['check_in'])
-                check_out = parse_date(request.query_params['check_out'])
-
-            except:
-                return Response('Arguments not valid', http.HTTPStatus.BAD_REQUEST)
-
-        if request.query_params.get('size'):
-            try:
-                size = int(request.query_params['size'])
-
-            except:
-                return Response('Arguments not valid', http.HTTPStatus.BAD_REQUEST)
-
-        return super(HotelSearchViewSet, self).list(request, *args, **kwargs)
-
+class HotelSearchViewSet(APIView):
+    
+       def get(self,request):
+           city=request.GET.get('city',"")
+           checkout=request.GET.get('checkout',"")
+           checkin=request.GET.get('checkin',"")
+           country=request.GET.get('country',"")
+           size=request.GET.get('country',0)
+           queryset=None
+           if city or checkout or checkin or country or size:
+               queryset=Room.objects.all(is_reserved=False)
+           else:
+                queryset= Room.objects.filter(is_reserved=False,hotel__city__contains=city, check_out_range=checkout, check_in_range=checkin,hotel__country__contains=country,size=size)
+           serializer=RoomSerializer(queryset,many=True)
+           return Response(serializer.data,status=status.HTTP_200_OK) 
 
 class FavoriteViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin, viewsets.mixins.CreateModelMixin):
     permission_classes = [permissions.IsAuthenticated]
