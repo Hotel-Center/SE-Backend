@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from Account.models import User
 from rest_framework.authentication import get_user_model
-
+from datetime import datetime 
 
 class Facility(models.Model):
     name = models.CharField(max_length=100, unique=True, primary_key=True)
@@ -32,8 +32,7 @@ class Hotel(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     reply_count = models.IntegerField(default=0, )
-    check_out_range = models.CharField(max_length=30)  # range of checkout
-    check_in_range = models.CharField(max_length=30)  # range of checkout
+   
     facilities = models.ManyToManyField(Facility, related_name="hotels")
 
     def __str__(self):
@@ -78,7 +77,8 @@ class Room(models.Model):
     price = models.IntegerField(blank=False, null=False)
     option = models.CharField(max_length=100, blank=True, null=True)
     facilities = models.ManyToManyField(roomFacility, related_name='rooms')
-
+    check_in_range = models.DateField() # range of checkout
+    check_out_range = models.DateField() # range of checkout
     def __str__(self):
         return 'Room of type {} for hotel "{}" '.format(self.type, self.hotel)
 
