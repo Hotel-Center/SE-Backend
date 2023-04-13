@@ -79,6 +79,7 @@ class Room(models.Model):
     facilities = models.ManyToManyField(roomFacility, related_name='rooms')
     check_in_range = models.DateField() # range of checkout
     check_out_range = models.DateField() # range of checkout
+    is_reserved =models.BooleanField(default=False)
     def __str__(self):
         return 'Room of type {} for hotel "{}" '.format(self.type, self.hotel)
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Hotel, Facility, HotelImage, FavoriteHotel
+from ..models import Hotel, Facility, HotelImage, FavoriteHotel,Room
 
 
 class FacilitiesSerializer(serializers.ModelSerializer):
@@ -15,7 +15,7 @@ class HotelSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hotel
         fields = ['id', 'name', 'header', 'city', 'state', 'description', 'facilities', 'rate', 'is_favorite',
-                  'reply_count', 'phone_numbers', 'country', 'check_in_range', "check_out_range", 'start_date',
+                  'reply_count', 'phone_numbers', 'country', 'start_date',
                   'address', 'capacity']
         read_only_fields = ['id', "rate", 'reply_count', 'start_date', 'capacity']
         # lookup_field = 'id'
@@ -118,3 +118,15 @@ class BestHotelSerializer(serializers.ModelSerializer):
         # print("besthotel serializer\nuser_id", user.id, "\nhotel_id", obj.id, "\nis_fav", is_fav)
 
         return is_fav
+
+
+class MiniInfoHotelSerializer(serializers.ModelSerializer):
+     class Meta:
+        model=Hotel
+        Fields=['name', 'header', 'city', 'state', 'description','rate','phone_numbers', 'country']
+class RoomSerializer(serializers.ModelSerializer):
+    
+    hotel=MiniInfoHotelSerializer()
+    class Meta:
+        model=Room
+        Fields=['id','hotel','option','price','type']
