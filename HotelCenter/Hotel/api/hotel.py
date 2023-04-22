@@ -23,12 +23,12 @@ from math import sqrt
 from django .db.models.query import QuerySet
 
 from rest_framework.permissions import IsAuthenticated
-from HotelCenter.permissions import IsManager
+from HotelCenter.permissions import IsManager, IsCustomer
 
 class HotelCreateListAPi(ListCreateAPIView):
      
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly]
+                          IsOwnerOrReadOnly , IsManager]
     
     serializer_class=HotelSerializer
     queryset=Hotel.objects.all()
@@ -265,7 +265,7 @@ class HotelImgViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin,
 
 class MyHotelsViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
     serializer_class = HotelSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated , IsCustomer]
 
     def dispatch(self, request, *args, **kwargs):
         self.request = request

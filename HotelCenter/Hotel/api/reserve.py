@@ -16,11 +16,11 @@ from ..models import CancelReserve, Reserve, Room
 from ..serializers.reserve_serializers import CancelReserveSerializer, RoomReserveSerializer, ReserveSerializer, \
     AdminReserverSerializer
 from ..tasks import set_reserve_tasks
-# from HotelCenter.permissions import IsManager, IsCustomer
+from HotelCenter.permissions import IsManager, IsCustomer
 
 
 class ReserveList(APIView):
-    permission_classes = [IsAuthenticated ]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, room_id):
         reserveList = Reserve.objects.filter(user=request.user)
@@ -74,7 +74,7 @@ def checkCondition(room, start, end):
 
 class AdminReserveViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
-    permission_classes = (IsAuthenticated, IsUrlHotelEditor)
+    permission_classes = (IsAuthenticated, IsUrlHotelEditor , IsManager)
     filterset_class = AdminReserveFilter
     serializer_class = AdminReserverSerializer
 
@@ -85,7 +85,7 @@ class AdminReserveViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class UserCancelReserveList(APIView):
-    permission_classes = [IsAuthenticated ]
+    permission_classes = [IsAuthenticated , IsCustomer]
 
     def post(self, request):
         user = request.user

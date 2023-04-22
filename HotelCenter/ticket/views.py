@@ -11,25 +11,33 @@ from .serializers import RequestFormSerializer,TicketFormSerializer,AdminTicketS
 from .models import RequestForm,TicketForm
 # Create your views here.
 
-
+from HotelCenter.permissions import IsManager, IsCustomer
 
 
 class TypeRequestsList(ListCreateAPIView): #get list type request and post it 
+    permission_classes=[IsAuthenticated , IsCustomer]
+
     serializer_class=RequestFormSerializer
     queryset=RequestForm.objects.all()
 
 
-class MyTicketList(ListCreateAPIView):   #get list ticket and post it 
+class MyTicketList(ListCreateAPIView):   #get list ticket and post it
+    permission_classes=[IsAuthenticated , IsCustomer]
+
     serializer_class=TicketFormSerializer
     queryset= TicketForm.objects.all()
     
     
 class ResponseAdminAPIs(RetrieveUpdateAPIView): ### get one ticket and update it 
+    permission_classes=[IsAuthenticated , IsCustomer]
+
     queryset=TicketForm.objects.all()
     serializer_class=AdminTicketSerializer
 
 
 class ShowAdminTicketList(ListAPIView):
+    permission_classes=[IsAuthenticated , IsManager]
+
     queryset=TicketForm.objects.all()
     serializer_class=AdminTicketSerializer
     

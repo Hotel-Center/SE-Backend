@@ -20,7 +20,7 @@ from ..permissions import IsUrlHotelEditor
 #                                             RoomSpaceSerializer, AdminRoomSpaceSerializer)
 from ..serializers.room_serializers import (PublicRoomSerializer, roomFacilitiesSerializer, RoomImageSerializer)
 from ..models import Hotel
-# from HotelCenter.permissions import IsManager, IsCustomer
+from HotelCenter.permissions import IsManager, IsCustomer
 
 class RoomList(APIView):
 
@@ -78,7 +78,7 @@ class ImageList(APIView):
 
 
 class AdminRoomViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [IsAuthenticated, IsUrlHotelEditor]
+    permission_classes = [IsAuthenticated, IsUrlHotelEditor , IsManager]
     filter_backends = [DjangoFilterBackend]
     serializer_class = PublicRoomSerializer
     filterset_class = AdminRoomFilter
