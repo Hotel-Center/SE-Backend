@@ -44,4 +44,5 @@ jobs:
     #     python manage.py makemigrations
     - name: Run Tests
       run: |
+        cd HotelCenter
         python manage.py test
