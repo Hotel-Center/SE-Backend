@@ -9,100 +9,120 @@ import json
 
 
 class Ticket(APITestCase):
-    def setUp(self) -> None:
-        
-                    new_user1 ={
-                        "email": "amin@gmail.com",
-                        "phone_number": "09133630096",
-                        "role": "C",
-                        "password": "ILOVEDJANGO"
-    }
-                    new_user2 ={
-                        "email": "ali@gmail.com",
-                        "phone_number": "09133630095",
-                        "role": "M",
-                        "password": "ILOVEDJANGO"
-    }
-                    
-                    new_user3 ={
-                        "email": "reza@gmail.com",
-                        "phone_number": "09133630092",
-                        "role": "A",
-                        "password": "ILOVEDJANGO"
-    }
-                
+        def setUp(self) -> None:
+                        new_user1 ={
+                            "email": "amin@gmail.com",
+                            "phone_number": "09133630096",
+                            "role": "C",
+                            "password": "ILOVEDJANGO"
+        }
+                        new_user2 ={
+                            "email": "ali@gmail.com",
+                            "phone_number": "09133630095",
+                            "role": "M",
+                            "password": "ILOVEDJANGO"
+        }
                         
-                    self.user1 =get_user_model().objects.create_user(**new_user1)
-                    self.user1.is_active=True
-                    self.user1.save()
-                    self.token1 = Token.objects.create(user=self.user1)
+                        new_user3 ={
+                            "email": "reza@gmail.com",
+                            "phone_number": "09133630092",
+                            "role": "A",
+                            "password": "ILOVEDJANGO"
+        }
                     
-                    
-                    
-                    self.user2 =get_user_model().objects.create_user(**new_user2)
-                    self.user2.is_active=True
-                    self.user2.save()
-                    self.token2 = Token.objects.create(user=self.user2)
-                    
-                    
-                    self.user3 =get_user_model().objects.create_user(**new_user3)
-                    self.user3.is_active=True
-                    self.user3.save()
-                    self.token3 = Token.objects.create(user=self.user3)
-                    
-                    
-                    
-    def set_credential(self, token):
-            """
-                set token for authorization
-            """
-            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+                            
+                        self.user1 =get_user_model().objects.create_user(**new_user1)
+                        self.user1.is_active=True
+                        self.user1.save()
+                        self.token1 = Token.objects.create(user=self.user1)
+                        
+                        
+                        
+                        self.user2 =get_user_model().objects.create_user(**new_user2)
+                        self.user2.is_active=True
+                        self.user2.save()
+                        self.token2 = Token.objects.create(user=self.user2)
+                        
+                        
+                        self.user3 =get_user_model().objects.create_user(**new_user3)
+                        self.user3.is_active=True
+                        self.user3.save()
+                        self.token3 = Token.objects.create(user=self.user3)
+                        
+                        
+                        self.re1=RequestForm.objects.create(name="Re1")
+                        self.re2=RequestForm.objects.create(name="Re2")
+                        self.re3=RequestForm.objects.create(name="Re3")
+                        
+                        self.ti1=TicketForm.objects.create(sender=self.user1,text="text1",request=self.re1)
+                        self.ti2=TicketForm.objects.create(sender=self.user2,text="text2",request=self.re2)
+                        
+                        
+        def set_credential(self, token):
+                """
+                    set token for authorization
+                """
+                self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-    def test_is_not_None(self):
-        request1=self.client.get(reverse("nearhotel"),self.myloc1).json()
-        request2=self.client.get(reverse("nearhotel"),self.myloc2).json()
-        request3=self.client.get(reverse("nearhotel"),self.myloc3).json()
+        def test_str_Request(self):
+            self.assertEqual(self.re1.name,"Re1")
+            self.assertEqual(self.re2.name,"Re2")
+            self.assertEqual(self.re3.name,"Re3")
         
-        self.assertNotEqual(request1,None)
-        self.assertNotEqual(request2,None)
-        self.assertNotEqual(request3,None)
-        pass 
-    def test_result(self):
+        def test_str_ticket(self):
+            self.assertEqual(self.ti1.text,"text1")
+            self.assertEqual(self.ti2.text,"text2")
+            
+        def test_request_list_notpermission_auth(self):
+            request1=self.client.get("/ticket/new_type_request/")
+            self.assertEqual(request1.status_code
+                             ,401)
         
-        request1=self.client.get(reverse("nearhotel"),self.myloc1).json()
-        request2=self.client.get(reverse("nearhotel"),self.myloc2).json()
-        request3=self.client.get(reverse("nearhotel"),self.myloc3).json()
+        def test_request_list_not_admin(self):
+            self.set_credential(token=self.token2)
+            request1=self.client.get('/ticket/new_type_request/')
+            self.assertEqual(request1.status_code,403)
         
-        self.assertEqual([2,3],[i["id"] for i in request1])
-        self.assertEqual([2,3],[i["id"] for i in request2])
-        self.assertEqual([1],[i["id"] for i in request3])
-    
-    def test_length_is_ok_but_result_not_ok(self):
-        request1=self.client.get(reverse("nearhotel"),self.myloc1).json()
-        request2=self.client.get(reverse("nearhotel"),self.myloc2).json()
-        request3=self.client.get(reverse("nearhotel"),self.myloc3).json()
-        r1=[i["id"] for i in request1]
-        r2=[i["id"] for i in request2]
-        r3=[i["id"] for i in request3]
-        self.assertEqual(len(r1),2)
-        self.assertTrue(1 not in r1)
-        self.assertEqual(len(r2),2)
-        self.assertTrue(1 not in r2)
-        self.assertEqual(len(r3),1)
-        self.assertTrue(2 not in r3)
-    
-    def test_withot_parametr(self):
-        request1=self.client.get(reverse("nearhotel")).json()
-        r1=[i["id"] for i in request1]
-        self.assertEqual([2,3],r1)
-        self.assertNotEqual(r1,None)
-        self.assertNotEqual(r1,[])
-
-    def test_status_code(self):
-        request1=self.client.get(reverse("nearhotel"),self.myloc1)
-        request2=self.client.get(reverse("nearhotel"),self.myloc2)
-        request3=self.client.get(reverse("nearhotel"),self.myloc3)
+        def test_request_list_not_admin(self):
+            self.set_credential(token=self.token3)
+            request1=self.client.get('/ticket/new_type_request/')
+            self.assertEqual(request1.status_code,200)
+            self.assertEqual([i['id'] for i in request1.json()],[1,2,3])
+            
+        def test_request_list_not_admin(self):
+            self.set_credential(token=self.token3)
+            request1=self.client.get('/ticket/new_type_request/')
+            self.assertEqual(request1.status_code,200)
+            self.assertEqual([i['id'] for i in request1.json()],[1,2,3])
+            
+        def test_request_add_new_req(self):
+            self.set_credential(token=self.token3)
+            request1=self.client.post('/ticket/new_type_request/',{"name":"req5"})
+            self.assertEqual(request1.status_code,201)
+            self.assertEqual(request1.json()['id'],4)
+            self.assertEqual(request1.json()['name'],"req5")
         
-        self.assertEqual(request1.status_code,200)
-        self.assertEqual(request2.status_code,200)
-        self.assertEqual(request3.status_code,200)
+        def test_request_add_new_req(self):
+            self.set_credential(token=self.token1)
+            request1=self.client.post('/ticket/myticket/',{"sender":1,"text":"text__4","request":1})
+            self.assertEqual(request1.status_code,201)
+            self.assertEqual(request1.json()['id'],3)
+            self.assertEqual(request1.json()['text'],"text__4")
+            
+        def test_request_add_new_req(self):
+            self.set_credential(token=self.token3)
+            request1=self.client.get('/ticket/admin_ticket_list/')
+            self.assertEqual(request1.status_code,200)
+            
+        
+            
+        
+         
+          
+            
+        
+            
+            
+            
+          
+       

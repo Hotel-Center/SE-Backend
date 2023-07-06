@@ -14,7 +14,7 @@ from HotelCenter.permissions import IsCustomer, IsManager, IsAdmin
 
 
 class TypeRequestsList(ListCreateAPIView):  # get list type request and post it
-    permission_class= [IsAdmin]
+    permission_classes= [IsAuthenticated, IsAdmin]
     serializer_class = RequestFormSerializer
     queryset = RequestForm.objects.all()
 
@@ -28,7 +28,7 @@ class MyTicketList(ListCreateAPIView):  # get list ticket and post it
 
 class ResponseAdminAPIs(RetrieveUpdateAPIView):  # get one ticket and update it
     permission_classes = [IsAuthenticated, IsAdmin]
-    queryset = TicketForm.objects.all,()
+    queryset = TicketForm.objects.all()
     serializer_class = AdminTicketSerializer
 
 
@@ -37,3 +37,4 @@ class ShowAdminTicketList(ListAPIView):
 
     queryset = TicketForm.objects.all()
     serializer_class = AdminTicketSerializer
+    
