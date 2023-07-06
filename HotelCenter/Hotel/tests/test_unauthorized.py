@@ -5,6 +5,12 @@ from Account.models import Customer, Manager
 from rest_framework import status
 from django.contrib.auth import get_user_model
 import json
+import io
+import random
+
+from PIL import Image
+from django.core.files.base import ContentFile
+from django.test import TestCase
 
 
 class UnauthorizedTest(APITestCase):
@@ -90,7 +96,7 @@ class UnauthorizedTest(APITestCase):
             "latitude": 0,
             "address": "Esfahan, Iran"
         }
-        response = self.client.post("/api/hotel/create/", data)
+        response = self.client.post("/api/hotel/hotel/", data)
         # self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -146,3 +152,63 @@ class UnauthorizedTest(APITestCase):
         self.set_credential(token=self.token2)
         response = self.client.get("/ticket/admin_ticket_list/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def generate_photo_file(self):
+        file = io.BytesIO()
+        r = random.Random().random()
+        image = Image.new('RGB', size=(100, 100), color=(
+            130, int(r * 120), int(10 + 5 * r)))
+        file.name = './test.png'
+        image.save("test.png", 'PNG')
+
+        file.seek(0)
+        return file
+
+    def test_hotel_creation_with_image(self):
+        self.set_credential(token=self.token2)
+        data = {'manager': '1',
+                'name': '"mamad"',
+                'country': '"iran"',
+                'city': '"jjjjjjjj"',
+                'address': '"dddd"'}
+        hotel_image = self.generate_photo_file()
+        data['files'] = [
+            ('files', (hotel_image.name, hotel_image, 'image/png'))]
+
+        # # add hotel_image to request as multipart/form-data
+
+        self.set_credential(self.token1)
+        response = self.client.post(
+            "/api/hotel/hotel/", data, format='multipart')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_hotel_creation_without_image(self):
+        self.set_credential(token=self.token2)
+        data = {'manager': '1',
+                'name': '"mamad"',
+                'country': '"iran"',
+                'city': '"jjjjjjjj"',
+                'address': '"dddd"'}
+        self.set_credential(self.token1)
+        response = self.client.post("/api/hotel/hotel/", data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_hotel_creation_without_required_fields(self):
+        self.set_credential(token=self.token2)
+        data = {'country': '"iran"',
+                'city': '"jjjjjjjj"',
+                'address': '"dddd"'}
+        self.set_credential(self.token1)
+        response = self.client.post("/api/hotel/hotel/", data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_hotel_creation_with_invalid_manager(self):
+        self.set_credential(token=self.token2)
+        data = {'manager': '9999',
+                'name': '"mamad"',
+                'country': '"iran"',
+                'city': '"jjjjjjjj"',
+                'address': '"dddd"'}
+        self.set_credential(self.token1)
+        response = self.client.post("/api/hotel/hotel/", data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

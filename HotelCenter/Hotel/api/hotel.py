@@ -18,7 +18,7 @@ from rest_framework.generics import ListCreateAPIView
 from ..permissions import *
 from ..models import Hotel, HotelImage, Reserve
 from rest_framework.pagination import PageNumberPagination
-from ..serializers.hotel_serializers import HotelSerializer, HotelImgSerializer, HotelSearchSerializer,HotelFullInfoSerializer
+from ..serializers.hotel_serializers import HotelSerializer, HotelImgSerializer, HotelSearchSerializer, HotelFullInfoSerializer
 # from ..serializers.room_serializers import
 # from ..filter_backends import HotelMinRateFilters
 from ..serializers.hotel_serializers import HotelSerializer
@@ -30,15 +30,17 @@ from django .db.models.query import QuerySet
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from HotelCenter.permissions import IsManager
 
+
 class HotelPagination(PageNumberPagination):
     page_size = 3
 
+
 class HotelGetInfo(ModelViewSet):
-    queryset=Hotel.objects.all()
-    serializer_class=HotelFullInfoSerializer
-    permission_class=[AllowAny]
-    pagination_class=HotelPagination
-    http_method_names=['get']
+    queryset = Hotel.objects.all()
+    serializer_class = HotelFullInfoSerializer
+    permission_class = [AllowAny]
+    pagination_class = HotelPagination
+    http_method_names = ['get']
 
 # class HotelCreateListAPi(ListCreateAPIView):
 
@@ -47,7 +49,11 @@ class HotelGetInfo(ModelViewSet):
 
 #     serializer_class = HotelSerializer
 #     queryset = Hotel.objects.all()
+
+
 class AddNewHotelView(APIView):
+    # permission_classes = [permissions.IsAuthenticated, IsManager]
+
     serializer_class = HotelSerializer
 
     def post(self, request, *args, **kwargs):
