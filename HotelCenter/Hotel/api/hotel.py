@@ -153,8 +153,8 @@ class NearHotelSearchApi(APIView):
     def get(self, request):
         x = request.GET.get('x', 0)
         y = request.GET.get('y', 0)
-        radius = 1
-        queryset = Hotel.objects.all()
+        radius = 0.05
+        queryset = Hotel.objects.filter(latitude__isnull=False,longitude__isnull=False)
         li_queryset = list(queryset)
         result = []
         for h in li_queryset:
