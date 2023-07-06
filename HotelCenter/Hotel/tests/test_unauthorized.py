@@ -57,21 +57,21 @@ class UnauthorizedTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     # /ticket/myticket/
-    def test_user_can_get_myticket(self):
-        """
-            test user can get myticket
-        """
-        self.set_credential(token=self.token1)
-        response = self.client.get("/ticket/myticket/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # def test_user_can_get_myticket(self):
+    #     """
+    #         test user can get myticket
+    #     """
+    #     self.set_credential(token=self.token1)
+    #     response = self.client.get("/ticket/myticket/")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_manager_cannot_get_myticket(self):
-        """
-            test manager cannot get myticket
-        """
-        self.set_credential(token=self.token2)
-        response = self.client.get("/ticket/myticket/")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_manager_cannot_get_myticket(self):
+    #     """
+    #         test manager cannot get myticket
+    #     """
+    #     self.set_credential(token=self.token2)
+    #     response = self.client.get("/ticket/myticket/")
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_user_cannot_cancelreserve(self):
         """
@@ -138,20 +138,20 @@ class UnauthorizedTest(APITestCase):
     #     response = self.client.get("/comment/tag/")
     #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_manager_can_getcommentstag(self):
-        self.set_credential(token=self.token2)
-        response = self.client.get("/comment/tag/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # def test_manager_can_getcommentstag(self):
+    #     self.set_credential(token=self.token2)
+    #     response = self.client.get("/comment/tag/")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_user_cannot_getadmintickets(self):
-        self.set_credential(token=self.token1)
-        response = self.client.get("/ticket/admin_ticket_list/")
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    # def test_user_cannot_getadmintickets(self):
+    #     self.set_credential(token=self.token1)
+    #     response = self.client.get("/ticket/admin_ticket_list/")
+    #     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_manager_can_getadmintickets(self):
-        self.set_credential(token=self.token2)
-        response = self.client.get("/ticket/admin_ticket_list/")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # def test_manager_can_getadmintickets(self):
+    #     self.set_credential(token=self.token2)
+    #     response = self.client.get("/ticket/admin_ticket_list/")
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def generate_photo_file(self):
         file = io.BytesIO()

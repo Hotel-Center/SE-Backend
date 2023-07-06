@@ -1,276 +1,167 @@
-# import http
-# import os
-# import random
-# from datetime import timedelta, date
-# from django.utils.http import urlencode
-# from django.contrib.auth import get_user_model
-# from rest_framework.authtoken.models import Token
-# from rest_framework.test import APITestCase
-# from rest_framework import status, reverse
-
-# from Hotel.models import Hotel, Facility
-# from .models import Comment
+from rest_framework.test import APITestCase
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from Account.models import Customer,Manager
+from Hotel.models import Hotel
+from .models import Tag, Comment, Reply
+from rest_framework import status
+from django.contrib.auth import get_user_model
+import json
 
 
-# def my_reverse(viewname, kwargs=None, query_kwargs=None):
-#     """
-#     Custom reverse to add a query string after the url
-#     Example usage:
-#     url = my_reverse('my_test_url', kwargs={'pk': object.id}, query_kwargs={'next': reverse('home')})
-#     """
-#     url = reverse.reverse(viewname, kwargs=kwargs)
+class CommentTest(APITestCase):
+    def setUp(self) -> None:
+                    new_user1 ={
+                        "email": "amin@gmail.com",
+                        "phone_number": "09133630096",
+                        "role": "C",
+                        "password": "ILOVEDJANGO"
+    }
+                    new_user2 ={
+                        "email": "ali@gmail.com",
+                        "phone_number": "09133630095",
+                        "role": "M",
+                        "password": "ILOVEDJANGO"
+    }
+                    
+                    new_user3 ={
+                        "email": "reza@gmail.com",
+                        "phone_number": "09133630092",
+                        "role": "A",
+                        "password": "ILOVEDJANGO"
+    }
+                    
+                    
+    
+                    hotel_data1 = {
+                            "name": "Parsian",
+                            "phone_number": "0912345678",
+                            "description": "Nice Hotel",
+                            "country": "Iran",
+                            "city": "Esfahan",
+                            "longitude": 2,
+                            "latitude": 1,
+                            "address": "Esfahan, Iran"
+                            }
+                        
+                    hotel_data2 = {
+                            "name": "Ferdosi",
+                            "city": "Khorasan",
+                            "country": "Iran",
+                            "check_in": "15:00",
+                            "check_out": "12:00",
+                            "description": "with best view of the city and places",
+                            "phone_number": "09123456709",
+                            'rate': 4.4,
+                            "address": "Khorasan,Iran",
+                            "longitude": 0.25,
+                            "latitude": 0.25,
+                        }
+                    hotel_data3 = {
+                            "name": "amirkabir",
+                            "city": "Kashan",
+                            "country": "Iran",
+                            "check_in": "15:00",
+                            "check_out": "12:00",
+                            "description": "with best view of the city and places",
+                            "phone_number": "09132001683",
+                            'rate': 4.4,
+                            "address": "Khorasan,Iran",
+                            "longitude": 0.1,
+                            "latitude": 0.1,
+                        }
+                    
+                
+                    
 
-#     if query_kwargs:
-#         return f'{url}?{urlencode(query_kwargs)}'
+                    
+                    self.user1 =get_user_model().objects.create_user(**new_user1)
+                    self.user1.is_active=True
+                    self.user1.save()
+                    self.token1 = Token.objects.create(user=self.user1)
+                    
+                    
+                    
+                    self.user2 =get_user_model().objects.create_user(**new_user2)
+                    self.user2.is_active=True
+                    self.user2.save()
+                    self.token2 = Token.objects.create(user=self.user2)
+                    
+                    
+                    self.user3 =get_user_model().objects.create_user(**new_user3)
+                    self.user3.is_active=True
+                    self.user3.save()
+                    self.token3 = Token.objects.create(user=self.user3)
+                    
+                    self.h1=Hotel.objects.create(manager=self.user2,**hotel_data1)
+                    self.h2=Hotel.objects.create(manager=self.user2,**hotel_data2)
+                    self.h3=Hotel.objects.create(manager=self.user2,**hotel_data3)
+                    
+                    self.tag1=Tag.objects.create(name="tag1")
+                    self.tag2=Tag.objects.create(name="tag2")
+                    self.tag3=Tag.objects.create(name="tag3")
+                    
+                    
+                    self.comment1=Comment.objects.create(writer=self.user1,text="text1",hotel= self.h1)
+                    self.comment2=Comment.objects.create(writer=self.user1,text="text2",hotel= self.h1)
+                    self.comment3=Comment.objects.create(writer=self.user1,text="text3",hotel= self.h1)
+                    
+                    self.reply1=Reply.objects.create(text_reply="text_reply1")
+                    self.reply2=Reply.objects.create(text_reply="text_reply2")
+                    
+                    self.comment1.reply=self.reply1
+                    self.comment1.save()
+                    self.comment2.reply=self.reply2
+                    self.comment2.save()
+                    
+                    
+                    
+    def set_credential(self, token):
+            """
+                set token for authorization
+            """
+            self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
-#     return url
-
-
-# class CommentTestCases(APITestCase):
-
-#     def setUp(self) -> None:
-#         """
-#             RUNS BEFORE EACH TEST
-#         """
-
-#         self.test_root = os.path.abspath(os.path.dirname(__file__))
-#         self.facility1 = {"name": "free_wifi"}
-#         self.facility2 = {"name": "parking"}
-
-#         self.facility1 = Facility.objects.create(**self.facility1)
-#         self.facility2 = Facility.objects.create(**self.facility2)
-
-#         self.hotel_data1 = {
-#             "name": "parsian",
-#             "city": "Esfehan",
-#             "state": "Esfehan",
-#             "country": "Iran",
-#             "check_in_range": "9:00-12:00",
-#             "check_out_range": "15:00-23:00",
-#             "description": "good quality including breakfast",
-#             "phone_numbers": "09123456700",
-
-#             # "facilities": [{"name": "free_wifi"}],
-#             "address": "Esfahan,Iran"
-#         }
-#         self.hotel_data2 = {
-#             "name": "Ferdosi",
-#             "city": "Khorasan",
-#             "state": "mashhad",
-#             "country": "Iran",
-#             "check_in_range": "9:00-12:00",
-#             "check_out_range": "15:00-23:00",
-#             "description": "with best view of the city and places",
-#             "phone_numbers": "09123456709",
-#             'rate': 4.4,
-#             # "facilities": [{"name": "free_wifi"}, {"name": "parking"}],
-#             "address": "Khorasan,Iran",
-
-#         }
-
-#         self.user1 = get_user_model().objects.create(is_active=True, email="nima.kam@gmail.com")
-#         self.user1.set_password("some-strong1pass")
-#         self.user1.save()
-
-#         self.user2 = get_user_model().objects.create(is_active=True, email="mohammad@gmail.com")
-#         self.user2.set_password("some-strong2pass")
-#         self.user2.save()
-
-#         self.user3 = get_user_model().objects.create(is_active=True, email="reza@gmail.com")
-#         self.user3.set_password("some-strong2pass")
-#         self.user3.save()
-
-#         self.token1 = Token.objects.create(user=self.user1)
-#         self.token2 = Token.objects.create(user=self.user2)
-#         self.token3 = Token.objects.create(user=self.user3)
-
-#         self.hotel1 = Hotel.objects.create(creator=self.user2, **self.hotel_data1)
-#         self.hotel2 = Hotel.objects.create(creator=self.user2, **self.hotel_data2)
-
-#         self.comment1 = {
-#             "text": "The hotel was good and our room was clean.",
-#             "rate": 5
-#         }
-#         self.comment2 = {
-#             "text": "our room was dirty and there was no room services.",
-#             "rate": 2
-#         }
-
-#     def set_credential(self, token):
-#         """
-#                 set token for authorization
-#             """
-#         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-#     def unset_credential(self):
-#         """
-#             unset existing headers
-#         """
-#         self.client.credentials()
-
-#     def create_comment(self):
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 1})
-#         self.set_credential(self.token2)
-#         resp = self.client.post(url, data=self.comment1)
-
-#         self.set_credential(self.token1)
-#         resp = self.client.post(url, data=self.comment2)
-#         # comment2 = Comment.objects.create(**self.comment2, hotel=self.hotel1, writer=self.user1)
-#         resp = self.client.post(url, data=self.comment1)
-#         # comment2 = Comment.objects.create(**self.comment2, hotel=self.hotel1, writer=self.user1)
-
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 2})
-
-#         resp = self.client.post(url, data=self.comment1)
-#         # comment3 = Comment.objects.create(**self.comment1, hotel=self.hotel2, writer=self.user1)
-#         self.unset_credential()
-
-#     def test_comment_get_list(self):
-#         # not valid hotel
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 100})
-
-#         self.create_comment()
-
-#         resp = self.client.get(url)
-#         # print('1 comment list test resp: ', resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.OK)
-#         self.assertTrue(len(resp.data) == 0)
-
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": self.hotel1.id})
-
-#         resp = self.client.get(url)
-#         # print('1 comment list test resp: ', resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.OK)
-#         self.assertTrue(len(resp.data) == 3)
-
-#     def test_comment_unauth(self):
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 1})
-
-#         resp = self.client.post(url, data=self.comment1)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.UNAUTHORIZED)
-
-#     def test_comment__create_success(self):
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 1})
-#         self.set_credential(self.token1)
-#         # hotel1 = Hotel.objects.get(pk=1)
-#         resp = self.client.post(url, data=self.comment1)
-
-#         self.assertEqual(resp.status_code, http.HTTPStatus.CREATED)
-
-#         resp = self.client.post(url, data=self.comment2)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.CREATED)
-
-#         resp = self.client.post(url, data=self.comment1)
-
-#         self.assertEqual(resp.status_code, http.HTTPStatus.CREATED)
-
-#         hotel1 = Hotel.objects.get(pk=1)
-#         self.assertTrue(hotel1.reply_count == 3)
-
-#     def test_comment__create_wrong_data(self):
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 1})
-#         self.set_credential(self.token1)
-
-#         data = {"text": "hi", "rate": "nine"}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         data = {"text": "hi", "rate": 9}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         data = {"text": "hi", "rate": -9}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         data = {"text": "hi"}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         data = {"rate": 5, "text": ""}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         url = my_reverse("hotel-comment-list", kwargs={"hid": 10})
-
-#         data = {"rate": 1, "text": "hotel did not exists"}
-#         resp = self.client.post(url, data=data)
-#         # print("test comment resp", resp.data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.NOT_FOUND)
-
-#     def test_comment__update_delete_wrong_auth(self):
-#         self.create_comment()
-#         url = my_reverse("hotel-comment-detail", kwargs={"pk": 1, "hid": 1})
-
-#         data = {"rate": 3}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.UNAUTHORIZED)
-
-#         self.set_credential(self.token3)
-#         data = {"rate": 4, "text": "hotel is updated"}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.FORBIDDEN)
-
-#         url = my_reverse("hotel-comment-detail", kwargs={"pk": 1, "hid": 20})
-
-#         self.set_credential(self.token1)
-#         data = {"rate": 4, "text": "hotel is updated"}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.NOT_FOUND)
-#         resp = self.client.delete(url)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.NOT_FOUND)
-
-#         url = my_reverse("hotel-comment-detail", kwargs={"pk": 1, "hid": 2})
-
-#         self.set_credential(self.token1)
-#         data = {"rate": 4, "text": "hotel is updated"}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.NOT_FOUND)
-#         resp = self.client.delete(url)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.NOT_FOUND)
-
-#     def test_comment__update_delete_hotel_not_valid(self):
-#         self.create_comment()
-#         self.set_credential(self.token2)
-#         url = my_reverse("hotel-comment-detail", kwargs={"pk": 1, "hid": 1})
-
-#         data = {"rate": 6}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#         data = {"rate": -4}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.BAD_REQUEST)
-
-#     def test_comment__update_delete_success(self):
-#         self.create_comment()
-#         com=Comment.objects.filter(hotel=2).first()
-#         url = my_reverse("hotel-comment-detail", kwargs={"pk": com.id, "hid": 2})
-
-#         self.set_credential(self.token1)
-#         data = {"rate": 4, "text": "hotel is updated"}
-#         resp = self.client.put(url, data)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.OK)
-
-#         resp = self.client.delete(url)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.OK)
-
-#     def test_my_comment__unauth(self):
-#         self.create_comment()
-#         url = my_reverse("hotel-mycomment-list", kwargs={"hid": 1})
-#         resp = self.client.get(url)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.UNAUTHORIZED)
-
-#     def test_my_comment__success(self):
-#         self.create_comment()
-#         url = my_reverse("hotel-mycomment-list", kwargs={"hid": 1})
-
-#         self.set_credential(self.token1)
-#         resp = self.client.get(url)
-#         self.assertEqual(resp.status_code, http.HTTPStatus.OK)
-#         self.assertEqual(len(resp.data), 2)
+    def test_str_tag(self):
+            self.assertEqual(self.tag1.name,"tag1")
+            self.assertEqual(self.tag2.name,"tag2")
+            self.assertEqual(self.tag3.name,"tag3")
+        
+    def test_str_comment(self):
+            self.assertEqual(self.comment1.text,"text1")
+            self.assertEqual(self.comment2.text,"text2")
+            
+    def test_tag_notpermission(self):
+         request1=self.client.get("/comment/tag/")
+         self.assertEqual(request1.status_code
+                             ,401)
+    
+    def test_tag_haspermission(self):
+        self.set_credential(token=self.token2)
+        request1=self.client.get("/comment/tag/")
+        self.assertEqual(request1.status_code
+                             ,200)
+    
+    def test_new_comment_nopermission_Iscustomer(self):
+        request1=self.client.post("/comment/addcomment/",{"writer":1,"hotel":1,"text":"hello"})
+        self.assertEqual(request1.status_code
+                             ,401)
+    def test_new_comment2_nopermission(self):
+        self.set_credential(token=self.token2)
+        request1=self.client.post("/comment/addcomment/",{"writer":1,"hotel":1,"text":"hello"})
+        self.assertEqual(request1.status_code
+                             ,403)
+                               
+    def test_new_comment_ok(self):
+        self.set_credential(token=self.token1)
+        request1=self.client.post("/comment/addcomment/",{"writer":1,"hotel":1,"text":"hello"})
+        self.assertEqual(request1.status_code
+                             ,200)
+        
+         
+         
+        
+        
+        
+           
+            

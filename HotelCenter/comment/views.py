@@ -44,7 +44,7 @@ class Commentdetail(APIView):
                 # request.data.pop("tag")
             serializer=WriteCommentSerializer(comment,data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            serializer.save()   
             
             count_comment=Comment.objects.filter(hotel_id=request.data['hotel']).count()
             hotel_ = get_object_or_404(Hotel,pk=request.data['hotel'])

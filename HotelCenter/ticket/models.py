@@ -16,7 +16,14 @@ class  TicketForm(models.Model):
     request  = models.ForeignKey("RequestForm", on_delete=models.CASCADE,related_name="task_list")
     updated_date=models.DateTimeField(auto_now=True)
     response_text=models.TextField(default="")
+    
+    def __str__(self):
+        return self.response_text
+    
 
 class RequestForm(models.Model):
      name=models.CharField(max_length=155)
+     def __str__(self):
+         return self.name
+   
      
