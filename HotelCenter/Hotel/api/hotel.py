@@ -290,7 +290,7 @@ class HotelViewSet(viewsets.ModelViewSet):
 
 
 class MyHotelsViewSet(viewsets.GenericViewSet, viewsets.mixins.ListModelMixin):
-    serializer_class = HotelSerializer
+    serializer_class = HotelFullInfoSerializer
     permission_classes = [permissions.IsAuthenticated, IsManager]
 
     def dispatch(self, request, *args, **kwargs):
