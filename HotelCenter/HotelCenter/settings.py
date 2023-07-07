@@ -95,13 +95,21 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': BASE_DIR / 'db.sqlite3',
     # },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'Hotel_center',
+    #     'USER': 'h_user',
+    #     'PASSWORD': 'StrOng1-paSs2',
+    #     'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+    #     'PORT': '5432',
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Hotel_center',
-        'USER': 'h_user',
-        'PASSWORD': 'StrOng1-paSs2',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
-        'PORT': '5432',
+        'USER': 'root',
+        'PASSWORD': '8XzoWxBrSbJsSJfQL7A5OIc7',
+        'HOST': 'aberama.iran.liara.ir',   # Or an IP Address that your DB is hosted on
+        'PORT': '32665',
     },
     'TEST': {
         'ENGINE': 'django.db.backends.sqlite3',
