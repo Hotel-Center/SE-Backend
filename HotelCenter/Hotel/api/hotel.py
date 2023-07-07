@@ -165,7 +165,7 @@ class NearHotelSearchApi(APIView):
 
             if cal <= radius:
                 result.append(h)
-        ser = HotelSerializer(result, many=True)
+        ser = HotelFullInfoSerializer(result, many=True)
         return Response(ser.data, status=status.HTTP_200_OK)
 
 
