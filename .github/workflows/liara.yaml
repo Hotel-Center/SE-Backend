@@ -1,0 +1,57 @@
+name: CD-Liara
+on:
+  push:
+    branches:
+      - Develop
+
+  pull_request:
+    branches:
+      - Develop
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Make migrations
+        run: |
+          cd HotelCenter
+          python manage.py makemigrations
+      - name: Run Tests
+        run: |
+          cd HotelCenter
+          python manage.py test'
+      - name: Copy Files
+        run: |
+          sudo cp -r ./ /home/ubuntu/hotelcenter/backend/
+          ls /home/ubuntu/hotelcenter/backend/ -l
+
+      - name: update-liara
+        env:
+          LIARA_TOKEN: ${{ secrets.LIARA_API_TOKEN }}
+        run: |
+          # npm i -g @liara/cli@3
+          cd /home/ubuntu/hotelcenter
+          sudo systemctl start docker
+          sudo service docker start
+          sudo docker-compose ps
+
+          sudo docker-compose down
+          sudo docker-compose build
+          sudo docker-compose up -d
+          sudo docker exec vira_back_1 python manage.py makemigrations
+          sudo docker exec vira_back_1 python manage.py migrate
+
+          liara deploy --app="hotelcenter" --api-token="$LIARA_TOKEN" --detach
