@@ -32,7 +32,7 @@ jobs:
       - name: Run Tests
         run: |
           cd HotelCenter
-          python manage.py test'
+          python manage.py test
       - name: Copy Files
         run: |
           sudo cp -r ./ /home/ubuntu/hotelcenter/backend/
